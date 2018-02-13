@@ -1,7 +1,7 @@
 {
   "name": "anti-turtle-app",
   "version": "0.1.0",
-  "main": "lock.js",
+  "main": "src/lock.js",
   "scripts": {
     "start": "electron ."
   },

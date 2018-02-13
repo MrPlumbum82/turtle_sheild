@@ -1,21 +1,28 @@
-const electron = require('electron')
-const { app, BrowserWindow }= electron;
-// Module to control application life.
-const globalShortcut = electron.globalShortcut
+const { app, globalShortcut, BrowserWindow } = require('electron')
 
-let win
-
-app.on('activate', () => {
-    if (win === null) {
-        win.open("https://www.github.com", "github", "resizable,scrollbars,status");
-    }
-})
+let netWidth = 0
+let netHeight = 0
+let picWidth = 500
+let picHeight = 575
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', function () {
-    win = new BrowserWindow({ width: 800, height: 600 })
+
+    const { screen } = require('electron')
+    var allScreens = screen.getAllDisplays();
+
+    allScreens.forEach(element => {
+        netWidth = element.size.width + netWidth
+        netHeight = element.size.height
+    })
+
+    netHeight = netHeight - picHeight
+    netWidth = netWidth - picWidth
+
+    // Open the DevTools.
+    // win.webContents.openDevTools()
 
     // NOTE: Add keys that you want to make unresponsive
     // TODO: Add more key codes
@@ -36,11 +43,25 @@ app.on('ready', function () {
     ];
 
     const registerKeyCodes = (keyCodes) => {
-        keyCodes.forEach(function (element) {
+        keyCodes.forEach((element) => {
             // Register shortcut listener
             const ret = globalShortcut.register(element, () => {
-                console.log(element)
-                win.open("https://www.github.com", "github", "resizable,scrollbars,status");
+                let win = new BrowserWindow({
+                    width: picWidth,
+                    height: picHeight,
+                    x: getRandomInt(0, netWidth),
+                    y: getRandomInt(0, netHeight),
+                    frame: false,
+                    show: true,
+                })
+
+                win.on('closed', () => {
+                    win = null
+                })
+
+                // and load the index.html of the app.
+                win.loadURL("https://i.imgflip.com/24giss.jpg")
+
             })
 
             // When the accelerator is already taken by other applications, 
@@ -55,7 +76,7 @@ app.on('ready', function () {
     const unRegisterKeyCodes = (keyCodes) => {
         keyCodes.forEach(function (element) {
             // unRegister shortcut listener
-            globalShortcut.unregister(element)
+            const ret = globalShortcut.unregister(element, () => { })
         })
         console.log("TURTLE SHEILD OFFLINE!")
     }
@@ -70,3 +91,8 @@ app.on('ready', function () {
         console.log("TURTLE SHEILD ONLINE! Wait for John.B to attempt turtle...");
     })
 })
+
+// Helper
+const getRandomInt = (min, max) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
